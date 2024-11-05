@@ -9,7 +9,13 @@
   },
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^5.21.1",
+    "amipets": "file:",
     "express": "^4.21.1",
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "prisma": "^5.21.1"
+  },
+  "devDependencies": {
+    "bcrypt": "^5.1.1"
   }
 }
