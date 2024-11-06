@@ -1,13 +1,19 @@
 import express from 'express';
-import petRoutes from './routes/pet.routes.js';
-import adotanteRoutes from './routes/adotante.routes.js';
-import adocaoRoutes from './routes/adocao.routes.js';
+import dotenv from 'dotenv';
+import petRoutes from './routes/petRoutes.js';
+import adotanteRoutes from './routes/adotanteRoutes.js';
+import adocaoRoutes from './routes/adocaoRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+
+dotenv.config();
 
 const app = express();
 app.use(express.json());
+
 app.use('/api', petRoutes);
 app.use('/api', adotanteRoutes);
 app.use('/api', adocaoRoutes);
+app.use('/api', authRoutes)
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
