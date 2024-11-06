@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import Adocao from '../entities/adocao.entity.js'; // Importe a entidade Adocao
+import Adocao from '../entities/adocao.js';
 
 const prisma = new PrismaClient();
 

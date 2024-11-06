@@ -1,6 +1,6 @@
 // src/controllers/PetController.js
 import { PrismaClient } from '@prisma/client';
-import Pet from '../entities/pet.entity.js';
+import Pet from '../entities/pet.js';
 
 const prisma = new PrismaClient();
 
