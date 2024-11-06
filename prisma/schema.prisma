@@ -16,6 +16,7 @@ model Pet {
   status         String   @default("disponível") // "disponível"
   tamanho        String? // Porte do pet (ex: pequeno, médio, grande)
   personalidade  String[] // Personalidade do pet (ex: brincalhão, calmo)
+  foto           String? 
 
   // Relacionamento com Adoção (op)
   adocao Adocao?
