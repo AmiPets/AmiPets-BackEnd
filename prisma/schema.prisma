@@ -13,10 +13,10 @@ model Pet {
   especie        String // Cachorro, Gato, Coelho, etc.
   dataNascimento DateTime // Data de nascimento aproximada
   descricao      String? // Descrição do pet
-  status         String   @default("disponível") // "disponível"
-  tamanho        String? // Porte do pet (ex: pequeno, médio, grande)
+  status         String   @default("0") // "disponível"
+  tamanho        String? //  Porte do pet (ex: pequeno, médio, grande)
   personalidade  String[] // Personalidade do pet (ex: brincalhão, calmo)
-  foto           String? 
+  foto           String?
 
   // Relacionamento com Adoção (op)
   adocao Adocao?
