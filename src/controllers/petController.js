@@ -1,102 +1,217 @@
-// src/controllers/PetController.js
-import { PrismaClient } from '@prisma/client';
-import Pet from '../entities/pet.js';
 
-const prisma = new PrismaClient();
+import { prismaClient } from "../database/prismaClient.js"
+import { isValidDate } from "../utils/isValidDate.js"
+import { validateId } from "../utils/validateId.js"
 
 class PetController {
-  // Create (criação já implementada)
+
+  // Cria um novo Pet
   static async createPet(req, res) {
-    const { nome, especie, dataNascimento, descricao, tamanho, personalidade } =
-      req.body;
 
-    try {
-      const newPet = await prisma.pet.create({
-        data: {
-          nome,
-          especie,
-          dataNascimento,
-          descricao,
-          tamanho,
-          personalidade,
-        },
-      });
-      res.status(201).json(new Pet(newPet));
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Erro ao criar o pet.' });
+    let { nome, especie, dataNascimento, descricao, status, tamanho, personalidade } = req.body;
+    let errorMessages = "";
+
+    if (!nome) {
+      errorMessages += "O nome deve ser incluído na requisição! "
     }
-  }
-
-  // Read - Obter todos os pets
-  static async getAllPets(req, res) {
-    try {
-      const pets = await prisma.pet.findMany();
-      res.status(200).json(pets);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Erro ao buscar os pets.' });
+    if (!especie) {
+      errorMessages += "A espécie deve ser incluída na requisição! ";
     }
-  }
-
-  // Read - Obter pet por ID
-  static async getPetById(req, res) {
-    const { id } = req.params;
-
-    try {
-      const pet = await prisma.pet.findUnique({
-        where: { id: parseInt(id, 10) },
-      });
-      if (pet) {
-        res.status(200).json(pet);
-      } else {
-        res.status(404).json({ error: 'Pet não encontrado.' });
+    if (!dataNascimento) {
+      errorMessages += "A data de nascimento deve ser incluído na requisição! ";
+    }
+    else {
+      if (!isValidDate(new Date(dataNascimento))) {
+        errorMessages += "A data deve possuir um formato válido! "
       }
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Erro ao buscar o pet.' });
     }
-  }
 
-  // Update - Atualizar pet por ID
-  static async updatePet(req, res) {
-    const { id } = req.params;
-    const { nome, especie, dataNascimento, descricao, tamanho, personalidade } =
-      req.body;
+    if (errorMessages) {
+      errorMessages = errorMessages.trim();
+      return res.status(400).json({ message: "Erro ao inserir Pet!", error: errorMessages });
+    }
 
     try {
-      const updatedPet = await prisma.pet.update({
-        where: { id: parseInt(id, 10) },
+      const newPet = await prismaClient.pet.create({
         data: {
           nome,
+          dataNascimento: new Date(dataNascimento),
           especie,
-          dataNascimento,
           descricao,
+          status,
           tamanho,
-          personalidade,
+          personalidade
         },
-      });
-      res.status(200).json(updatedPet);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Erro ao atualizar o pet.' });
+      })
+      return res.status(201).json({ message: "Pet cadastrado com sucesso!", newPet });
     }
+    catch (error) {
+      return res.status(500).json({ message: "Erro ao cadastrar Pet!", error: error.message });
+    }
+
   }
 
-  // Delete - Remover pet por ID
-  static async deletePet(req, res) {
-    const { id } = req.params;
+  // Atualiza Pet
+  static async updatePet(req, res) {
+
+    const { isIdValid, id, messageErrorId } = validateId(req.params.id);
+
+    if (!isIdValid) {
+      return res.status(400).json({ message: messageErrorId });
+    }
+
+    let { nome, especie, dataNascimento, descricao, status, tamanho, personalidade, foto } = req.body;
+
+    if (dataNascimento) {
+      if (isValidDate(new Date(dataNascimento))) {
+        dataNascimento = new Date(dataNascimento);
+      }
+      else {
+        return res.status(400).json({ message: "A data deve possuir um formato válido!" });
+      }
+    }
 
     try {
-      await prisma.pet.delete({
-        where: { id: parseInt(id, 10) },
+      const updatedPet = await prismaClient.pet.update({
+        where: {
+          id
+        },
+        data: {
+          nome,
+          dataNascimento,
+          especie,
+          descricao,
+          status,
+          tamanho,
+          personalidade,
+          foto
+        }
+      })
+
+      return res.status(200).json({ message: "Pet alterado com sucesso!", updatedPet });
+
+    }
+    catch (error) {
+
+      if (error.code === 'P2025') {
+        return res.status(404).json({ message: "Pet não encontrado com o id informado!" });
+      }
+      else {
+        return res.status(500).json({ message: "Erro ao atualizar pet!", error: error.message });
+      }
+    }
+
+  }
+
+  // Seleciona Pet por id
+  static async getPetById(req, res) {
+
+    const { isIdValid, id, messageErrorId } = validateId(req.params.id);
+
+    if (!isIdValid) {
+      return res.status(400).json({ message: messageErrorId });
+    }
+
+    try {
+      const selectedPet = await prismaClient.pet.findUnique({
+        where: {
+          id
+        }
+      })
+
+      if (!selectedPet) {
+        return res.status(404).json({ message: "Pet não encontrado com o id informado!" });
+      }
+
+      return res.status(200).json(selectedPet);
+
+    }
+    catch (error) {
+      return res.status(500).json({ message: "Erro ao encontrar pet!", error: error.message });
+    }
+
+  }
+
+  // Seleciona os pets por parâmetros query
+  static async getPets(req, res) {
+
+    let { offset, limit, especie, status, tamanho, personalidade } = req.query;
+
+    offset = (offset && !isNaN(Number(offset)) ? Number(offset) : 0);
+    limit = (limit && !isNaN(Number(limit)) ? Number(limit) : 15);
+
+    if (personalidade) {
+      try {
+        personalidade = JSON.parse(personalidade);
+        if (!Array.isArray(personalidade)) {
+          return res.status(400).json({ message: "Personalidade deve ser um array válido." });
+        }
+      }
+      catch (error) {
+        return res.status(500).json({ message: "Erro ao processar o campo 'personalidade'.", error: error.message });
+      }
+    }
+    else {
+      personalidade = [];
+    }
+
+    try {
+      const allPets = await prismaClient.pet.findMany({
+        skip: offset,
+        take: limit,
+        where: {
+          especie,
+          status,
+          tamanho,
+          ...(personalidade.length > 0 &&
+          {
+            personalidade: {
+              hasEvery: personalidade
+            }
+          }),
+        },
       });
-      res.status(204).send(); // Resposta sem conteúdo
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Erro ao excluir o pet.' });
+
+      return res.status(200).json(allPets);
+    }
+    catch (error) {
+      return res.status(500).json({ message: "Erro ao encontrar pets!", error: error.message });
     }
   }
+
+  // Deleta um Pet por id
+  static async deletePet(req, res) {
+
+    const { isIdValid, id, messageErrorId } = validateId(req.params.id);
+
+    if (!isIdValid) {
+      return res.status(400).json({ message: messageErrorId });
+    }
+
+    try {
+      const selectedPet = await prismaClient.pet.findUnique({
+        where: {
+          id
+        }
+      });
+
+      if (!selectedPet) {
+        return res.status(404).json({ message: "Pet não encontrado com o id informado!" });
+      }
+
+      const deletedPet = await prismaClient.pet.delete({
+        where: {
+          id
+        }
+      });
+
+      return res.status(200).json({ message: "Pet excluído com sucesso!", deletedPet });
+
+    } catch (error) {
+      return res.status(500).json({ message: "Erro ao excluir pet!", error: error.message });
+    }
+  }
+
 }
 
 export default PetController;
