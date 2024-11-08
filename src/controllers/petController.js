@@ -1,14 +1,20 @@
-// src/controllers/PetController.js
 import { PrismaClient } from '@prisma/client';
 import Pet from '../entities/pet.js';
 
 const prisma = new PrismaClient();
 
 class PetController {
-  // Create (criação já implementada)
+  // Create - Criar um novo pet
   static async createPet(req, res) {
-    const { nome, especie, dataNascimento, descricao, tamanho, personalidade } =
-      req.body;
+    const {
+      nome,
+      especie,
+      dataNascimento,
+      descricao,
+      tamanho,
+      personalidade,
+      foto,
+    } = req.body;
 
     try {
       const newPet = await prisma.pet.create({
@@ -19,6 +25,7 @@ class PetController {
           descricao,
           tamanho,
           personalidade,
+          foto,
         },
       });
       res.status(201).json(new Pet(newPet));
@@ -61,8 +68,15 @@ class PetController {
   // Update - Atualizar pet por ID
   static async updatePet(req, res) {
     const { id } = req.params;
-    const { nome, especie, dataNascimento, descricao, tamanho, personalidade } =
-      req.body;
+    const {
+      nome,
+      especie,
+      dataNascimento,
+      descricao,
+      tamanho,
+      personalidade,
+      foto,
+    } = req.body;
 
     try {
       const updatedPet = await prisma.pet.update({
@@ -74,6 +88,7 @@ class PetController {
           descricao,
           tamanho,
           personalidade,
+          foto,
         },
       });
       res.status(200).json(updatedPet);
