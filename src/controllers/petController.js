@@ -1,5 +1,6 @@
 
 import { prismaClient } from "../database/prismaClient.js"
+import Pet from "../entities/pet.js";
 import { isValidDate } from "../utils/isValidDate.js"
 import { validateId } from "../utils/validateId.js"
 
@@ -8,7 +9,7 @@ class PetController {
   // Cria um novo Pet
   static async createPet(req, res) {
 
-    let { nome, especie, dataNascimento, descricao, status, tamanho, personalidade } = req.body;
+    const { nome, especie, dataNascimento, descricao, status, tamanho, personalidade, foto } = req.body;
     let errorMessages = "";
 
     if (!nome) {
@@ -40,10 +41,11 @@ class PetController {
           descricao,
           status,
           tamanho,
-          personalidade
+          personalidade,
+          foto
         },
       })
-      return res.status(201).json({ message: "Pet cadastrado com sucesso!", newPet });
+      return res.status(201).json({ message: "Pet cadastrado com sucesso!", newPet: new Pet(newPet) });
     }
     catch (error) {
       return res.status(500).json({ message: "Erro ao cadastrar Pet!", error: error.message });
@@ -60,7 +62,8 @@ class PetController {
       return res.status(400).json({ message: messageErrorId });
     }
 
-    let { nome, especie, dataNascimento, descricao, status, tamanho, personalidade, foto } = req.body;
+    const { nome, especie, descricao, status, tamanho, personalidade, foto } = req.body;
+    let { dataNascimento } = req.body;
 
     if (dataNascimento) {
       if (isValidDate(new Date(dataNascimento))) {
@@ -123,7 +126,7 @@ class PetController {
         return res.status(404).json({ message: "Pet não encontrado com o id informado!" });
       }
 
-      return res.status(200).json(selectedPet);
+      return res.status(200).json(new Pet(selectedPet));
 
     }
     catch (error) {
