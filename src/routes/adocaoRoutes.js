@@ -9,5 +9,6 @@ router.get('/adocao', requireAuth, AdocaoController.getAllAdocoes);
 router.get('/adocao/:id', requireAuth, AdocaoController.getAdocaoById);
 router.put('/adocao/:id', requireAuth, AdocaoController.updateAdocao);
 router.delete('/adocao/:id', requireAuth, AdocaoController.deleteAdocao);
+router.get('/adocoes/adotante/:adotanteId', AdocaoController.getAdocoesByAdotanteId);
 
 export default router;
