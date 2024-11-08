@@ -16,7 +16,7 @@ class Pet {
     this.especie = especie;
     this.dataNascimento = dataNascimento;
     this.descricao = descricao;
-    this.status = status || 'disponível';
+    this.status = status || '0';
     this.tamanho = tamanho;
     this.personalidade = personalidade;
     this.adocaoId = adocaoId;

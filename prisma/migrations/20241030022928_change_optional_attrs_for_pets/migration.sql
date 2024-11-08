@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Pet" ALTER COLUMN "descricao" DROP NOT NULL,
+ALTER COLUMN "tamanho" DROP NOT NULL,
+ALTER COLUMN "personalidade" DROP NOT NULL;
