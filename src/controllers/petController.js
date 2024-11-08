@@ -6,15 +6,7 @@ const prisma = new PrismaClient();
 class PetController {
   // Create - Criar um novo pet
   static async createPet(req, res) {
-    const {
-      nome,
-      especie,
-      dataNascimento,
-      descricao,
-      tamanho,
-      personalidade,
-      foto,
-    } = req.body;
+    const { nome, especie, dataNascimento, descricao, tamanho, personalidade, foto } = req.body;
 
     try {
       const newPet = await prisma.pet.create({
@@ -68,15 +60,7 @@ class PetController {
   // Update - Atualizar pet por ID
   static async updatePet(req, res) {
     const { id } = req.params;
-    const {
-      nome,
-      especie,
-      dataNascimento,
-      descricao,
-      tamanho,
-      personalidade,
-      foto,
-    } = req.body;
+    const { nome, especie, dataNascimento, descricao, tamanho, personalidade, foto } = req.body;
 
     try {
       const updatedPet = await prisma.pet.update({
@@ -95,6 +79,31 @@ class PetController {
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Erro ao atualizar o pet.' });
+    }
+  }
+
+  // Read - Pesquisar pets com filtros recebidos em JSON
+  static async searchPets(req, res) {
+    const { nome, especie, status, tamanho, personalidade } = req.body;
+
+    try {
+      // Construir o filtro dinâmico
+      const filters = {};
+
+      if (nome) filters.nome = { contains: nome, mode: 'insensitive' };
+      if (especie) filters.especie = { contains: especie, mode: 'insensitive' };
+      if (status) filters.status = status;
+      if (tamanho) filters.tamanho = tamanho;
+      if (personalidade) filters.personalidade = { has: personalidade };
+
+      const pets = await prisma.pet.findMany({
+        where: filters, // Aplicando os filtros dinâmicos
+      });
+
+      res.status(200).json(pets);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro ao buscar pets.' });
     }
   }
 
