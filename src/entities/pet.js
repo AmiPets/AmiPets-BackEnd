@@ -9,7 +9,7 @@ class Pet {
     tamanho,
     personalidade,
     adocaoId,
-    foto
+    foto,
   }) {
     this.id = id;
     this.nome = nome;
@@ -23,5 +23,4 @@ class Pet {
     this.foto = foto;
   }
 }
-
 export default Pet;
