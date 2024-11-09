@@ -21,6 +21,16 @@ class AdotanteController {
     }
   }
 
+  // Read - Obter todos os Adotantes
+  static async getAdotante(req, res) {
+    try {
+      const adotantes = await prismaClient.adotante.findMany()
+      return res.status(200).json(adotantes)
+    } catch (error) {
+      return res.status(500).json({error: error.message})
+    }
+  }
+
   // Update - Atualizar Adotante por ID
   static async updateAdotante(req, res) {
     const { id } = req.params;
