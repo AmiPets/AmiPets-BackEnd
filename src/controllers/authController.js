@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import otpService from '../services/otpService.js';
 import sendEmail from '../services/emailService.js';
 import getWelcomeEmailTemplate from '../utils/templates/emailTemplates.js';
+import { generateToken } from '../services/jwtService.js';
 
 const prisma = new PrismaClient();
 
@@ -25,7 +26,7 @@ const signUp = async (req, res) => {
 
     await otpService.sendOTP(email, nome);
     return res.status(201).json({
-      message: "Cadastro realizado. Um código OTP foi enviado para seu e-mail para verificação.",
+      message: 'Cadastro realizado. Um código OTP foi enviado para seu e-mail para verificação.',
     });
   } catch (error) {
     console.error('Erro ao criar adotante:', error);
@@ -40,7 +41,7 @@ const verifyOTP = async (req, res) => {
   if (!valid) return res.status(422).json({ message });
 
   const userData = tempUsers[email];
-  if (!userData) return res.status(404).json({ message: "Usuário não encontrado." });
+  if (!userData) return res.status(404).json({ message: 'Usuário não encontrado.' });
 
   try {
     await prisma.adotante.create({
@@ -52,16 +53,18 @@ const verifyOTP = async (req, res) => {
         senha: userData.senha,
       },
     });
-    
-    const subject = "Bem-vindo!";
+
+    const subject = 'Bem-vindo!';
     const html = getWelcomeEmailTemplate(userData.nome);
     await sendEmail(userData.email, subject, html);
 
     delete tempUsers[email];
-    return res.status(201).json({ message: "Usuário verificado e cadastro concluído com sucesso!" });
+    return res
+      .status(201)
+      .json({ message: 'Usuário verificado e cadastro concluído com sucesso!' });
   } catch (error) {
-    console.error("Erro ao salvar o usuário:", error);
-    return res.status(500).json({ message: "Erro ao criar o usuário. Tente novamente!" });
+    console.error('Erro ao salvar o usuário:', error);
+    return res.status(500).json({ message: 'Erro ao criar o usuário. Tente novamente!' });
   }
 };
 
@@ -71,7 +74,7 @@ const login = async (req, res) => {
 
   try {
     const adotante = await prisma.adotante.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (!adotante) {
@@ -96,5 +99,5 @@ const login = async (req, res) => {
 export default {
   login,
   signUp,
-  verifyOTP
+  verifyOTP,
 };
