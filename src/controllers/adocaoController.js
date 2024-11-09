@@ -1,12 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import { prismaClient } from '../database/prismaClient.js';
 import Adocao from '../entities/adocao.js';
-
-const prisma = new PrismaClient();
 
 class AdocaoController {
   // Método para verificar a existência de um registro
   static async entityExists(type, id) {
-    const entity = await prisma[type].findUnique({
+    const entity = await prismaClient[type].findUnique({
       where: { id },
     });
     return entity !== null;
@@ -29,7 +27,7 @@ class AdocaoController {
       }
 
       // Verificar se o pet já está adotado
-      const petJaAdotado = await prisma.adocao.findUnique({
+      const petJaAdotado = await prismaClient.adocao.findUnique({
         where: { petId },
       });
       if (petJaAdotado) {
@@ -37,7 +35,7 @@ class AdocaoController {
       }
 
       // Criar nova adoção no banco
-      const novaAdocaoDb = await prisma.adocao.create({
+      const novaAdocaoDb = await prismaClient.adocao.create({
         data: {
           adotanteId,
           petId,
@@ -56,7 +54,7 @@ class AdocaoController {
   // Read - Obter todas as adoções
   static async getAllAdocoes(req, res) {
     try {
-      const adocoesDb = await prisma.adocao.findMany({
+      const adocoesDb = await prismaClient.adocao.findMany({
         include: {
           adotante: true,
           pet: true,
@@ -77,7 +75,7 @@ class AdocaoController {
     const { id } = req.params;
 
     try {
-      const adocaoDb = await prisma.adocao.findUnique({
+      const adocaoDb = await prismaClient.adocao.findUnique({
         where: { id: parseInt(id, 10) },
         include: {
           adotante: true,
@@ -114,7 +112,7 @@ class AdocaoController {
       }
 
       // Atualizar a adoção no banco
-      const adocaoAtualizadaDb = await prisma.adocao.update({
+      const adocaoAtualizadaDb = await prismaClient.adocao.update({
         where: { id: parseInt(id, 10) },
         data: {
           adotanteId,
@@ -134,7 +132,7 @@ class AdocaoController {
     const { id } = req.params;
 
     try {
-      await prisma.adocao.delete({
+      await prismaClient.adocao.delete({
         where: { id: parseInt(id, 10) },
       });
       res.status(204).send();
@@ -149,7 +147,7 @@ class AdocaoController {
     const { adotanteId } = req.params;
 
     try {
-      const adocoes = await prisma.adocao.findMany({
+      const adocoes = await prismaClient.adocao.findMany({
         where: { adotanteId: parseInt(adotanteId, 10) },
         include: {
           pet: true,

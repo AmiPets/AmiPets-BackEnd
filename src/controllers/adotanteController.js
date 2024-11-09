@@ -1,8 +1,5 @@
-// src/controllers/AdotanteController.js
-import { PrismaClient } from '@prisma/client';
+import { prismaClient } from '../database/prismaClient.js';
 import Adotante from '../entities/adotante.js';
-
-const prisma = new PrismaClient();
 
 class AdotanteController {
   // Read - Obter Adotante por ID
@@ -10,7 +7,7 @@ class AdotanteController {
     const { id } = req.params;
 
     try {
-      const adotante = await prisma.adotante.findUnique({
+      const adotante = await prismaClient.adotante.findUnique({
         where: { id: parseInt(id, 10) },
       });
       if (adotante) {
@@ -30,7 +27,7 @@ class AdotanteController {
     const { nome, email, telefone, endereco, senha, isAdmin } = req.body;
 
     try {
-      const adotante = await prisma.adotante.findUnique({
+      const adotante = await prismaClient.adotante.findUnique({
         where: { id: parseInt(id, 10) },
       });
       if (!adotante) {
@@ -53,7 +50,7 @@ class AdotanteController {
         updatedAdotante.senha = adotante.senha; // Mantém a senha antiga
       }
 
-      const adotanteAtualizado = await prisma.adotante.update({
+      const adotanteAtualizado = await prismaClient.adotante.update({
         where: { id: parseInt(id, 10) },
         data: {
           nome: updatedAdotante.nome,
@@ -76,7 +73,7 @@ class AdotanteController {
     const { id } = req.params;
 
     try {
-      await prisma.adotante.delete({
+      await prismaClient.adotante.delete({
         where: { id: parseInt(id, 10) },
       });
       res.status(202).json({ message: 'Adotante excluido com sucesso.' });

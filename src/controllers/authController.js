@@ -1,11 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { prismaClient } from '../database/prismaClient.js';
 import bcrypt from 'bcryptjs';
 import otpService from '../services/otpService.js';
 import sendEmail from '../services/emailService.js';
 import getWelcomeEmailTemplate from '../utils/templates/emailTemplates.js';
 import { generateToken } from '../services/jwtService.js';
-
-const prisma = new PrismaClient();
 
 const tempUsers = {};
 
@@ -13,7 +11,7 @@ const signUp = async (req, res) => {
   const { nome, email, telefone, endereco, senha } = req.body;
 
   try {
-    const existingUser = await prisma.adotante.findUnique({
+    const existingUser = await prismaClient.adotante.findUnique({
       where: { email },
     });
 
@@ -44,7 +42,7 @@ const verifyOTP = async (req, res) => {
   if (!userData) return res.status(404).json({ message: 'Usuário não encontrado.' });
 
   try {
-    await prisma.adotante.create({
+    await prismaClient.adotante.create({
       data: {
         nome: userData.nome,
         email: userData.email,
@@ -73,7 +71,7 @@ const login = async (req, res) => {
   const { email, senha } = req.body;
 
   try {
-    const adotante = await prisma.adotante.findUnique({
+    const adotante = await prismaClient.adotante.findUnique({
       where: { email },
     });
 
