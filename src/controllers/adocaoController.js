@@ -1,32 +1,33 @@
-import { PrismaClient } from '@prisma/client';
+import { prismaClient } from '../database/prismaClient.js';
 import Adocao from '../entities/adocao.js';
 
-const prisma = new PrismaClient();
-
 class AdocaoController {
+  // Método para verificar a existência de um registro
+  static async entityExists(type, id) {
+    const entity = await prismaClient[type].findUnique({
+      where: { id },
+    });
+    return entity !== null;
+  }
+
   // Create - Criar uma nova adoção
   static async createAdocao(req, res) {
     const { adotanteId, petId } = req.body;
 
     try {
-      // Verificar se o pet existe
-      const pet = await prisma.pet.findUnique({
-        where: { id: petId },
-      });
-      if (!pet) {
+      // Verificar se o pet e o adotante existem
+      const petExists = await AdocaoController.entityExists('pet', petId);
+      const adotanteExists = await AdocaoController.entityExists('adotante', adotanteId);
+
+      if (!petExists) {
         return res.status(404).json({ error: 'Pet não encontrado.' });
       }
-
-      // Verificar se o adotante existe
-      const adotante = await prisma.adotante.findUnique({
-        where: { id: adotanteId },
-      });
-      if (!adotante) {
+      if (!adotanteExists) {
         return res.status(404).json({ error: 'Adotante não encontrado.' });
       }
 
       // Verificar se o pet já está adotado
-      const petJaAdotado = await prisma.adocao.findUnique({
+      const petJaAdotado = await prismaClient.adocao.findUnique({
         where: { petId },
       });
       if (petJaAdotado) {
@@ -34,7 +35,7 @@ class AdocaoController {
       }
 
       // Criar nova adoção no banco
-      const novaAdocaoDb = await prisma.adocao.create({
+      const novaAdocaoDb = await prismaClient.adocao.create({
         data: {
           adotanteId,
           petId,
@@ -53,23 +54,19 @@ class AdocaoController {
   // Read - Obter todas as adoções
   static async getAllAdocoes(req, res) {
     try {
-      const adocoesDb = await prisma.adocao.findMany({
+      const adocoesDb = await prismaClient.adocao.findMany({
         include: {
           adotante: true,
           pet: true,
         },
       });
-      // Mapear registros para a classe Adocao
       const adocoes = adocoesDb.map((adocaoDb) => new Adocao(adocaoDb));
       res.status(200).json(adocoes);
     } catch (error) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          error:
-            'Erro ao buscar as adoções. Verifique se pet ou adotante existe.',
-        });
+      res.status(500).json({
+        error: 'Erro ao buscar as adoções. Verifique se pet ou adotante existe.',
+      });
     }
   }
 
@@ -78,7 +75,7 @@ class AdocaoController {
     const { id } = req.params;
 
     try {
-      const adocaoDb = await prisma.adocao.findUnique({
+      const adocaoDb = await prismaClient.adocao.findUnique({
         where: { id: parseInt(id, 10) },
         include: {
           adotante: true,
@@ -103,31 +100,25 @@ class AdocaoController {
     const { adotanteId, petId } = req.body;
 
     try {
-      // Verificar se o pet existe
-      const pet = await prisma.pet.findUnique({
-        where: { id: petId },
-      });
-      if (!pet) {
+      // Verificar se o pet e o adotante existem
+      const petExists = await AdocaoController.entityExists('pet', petId);
+      const adotanteExists = await AdocaoController.entityExists('adotante', adotanteId);
+
+      if (!petExists) {
         return res.status(404).json({ error: 'Pet não encontrado.' });
       }
-
-      // Verificar se o adotante existe
-      const adotante = await prisma.adotante.findUnique({
-        where: { id: adotanteId },
-      });
-      if (!adotante) {
+      if (!adotanteExists) {
         return res.status(404).json({ error: 'Adotante não encontrado.' });
       }
 
       // Atualizar a adoção no banco
-      const adocaoAtualizadaDb = await prisma.adocao.update({
+      const adocaoAtualizadaDb = await prismaClient.adocao.update({
         where: { id: parseInt(id, 10) },
         data: {
           adotanteId,
           petId,
         },
       });
-      // Instanciar a adoção atualizada usando a classe Adocao
       const adocaoAtualizada = new Adocao(adocaoAtualizadaDb);
       res.status(200).json(adocaoAtualizada);
     } catch (error) {
@@ -141,13 +132,35 @@ class AdocaoController {
     const { id } = req.params;
 
     try {
-      await prisma.adocao.delete({
+      await prismaClient.adocao.delete({
         where: { id: parseInt(id, 10) },
       });
       res.status(204).send();
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Erro ao excluir a adoção.' });
+    }
+  }
+
+  // Read - Obter todas as adoções feitas por um usuário específico
+  static async getAdocoesByAdotanteId(req, res) {
+    const { adotanteId } = req.params;
+
+    try {
+      const adocoes = await prismaClient.adocao.findMany({
+        where: { adotanteId: parseInt(adotanteId, 10) },
+        include: {
+          pet: true,
+          adotante: true,
+        },
+      });
+
+      res.status(200).json(adocoes);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        error: 'Erro ao buscar adoções para o adotante especificado.',
+      });
     }
   }
 }
