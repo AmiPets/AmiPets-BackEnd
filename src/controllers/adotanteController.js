@@ -79,7 +79,7 @@ class AdotanteController {
       await prisma.adotante.delete({
         where: { id: parseInt(id, 10) },
       });
-      res.status(204).send();
+      res.status(202).json({ message: 'Adotante excluido com sucesso.' });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Erro ao excluir o Adotante.' });
