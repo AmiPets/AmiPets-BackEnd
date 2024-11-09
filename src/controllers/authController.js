@@ -52,7 +52,7 @@ const verifyOTP = async (req, res) => {
       },
     });
 
-    const subject = 'Bem-vindo!';
+    const subject = "Bem-vindo!";
     const html = getWelcomeEmailTemplate(userData.nome);
     await sendEmail(userData.email, subject, html);
 
@@ -66,7 +66,6 @@ const verifyOTP = async (req, res) => {
   }
 };
 
-// Endpoint de login
 const login = async (req, res) => {
   const { email, senha } = req.body;
 
