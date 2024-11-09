@@ -23,8 +23,17 @@ class AdotanteController {
 
   // Read - Obter todos os Adotantes
   static async getAdotante(req, res) {
+
+    let { offset, limit } = req.query;
+
+    offset = (offset && !isNaN(Number(offset)) ? Number(offset) : 0);
+    limit = (limit && !isNaN(Number(limit)) ? Number(limit) : 50);
+    
     try {
-      const adotantes = await prismaClient.adotante.findMany()
+      const adotantes = await prismaClient.adotante.findMany({
+        skip: offset,
+        take: limit
+      })
       return res.status(200).json(adotantes)
     } catch (error) {
       return res.status(500).json({error: error.message})
