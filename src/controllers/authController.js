@@ -5,7 +5,6 @@ import sendEmail from '../services/emailService.js';
 import getWelcomeEmailTemplate from '../utils/templates/emailTemplates.js';
 
 const prisma = new PrismaClient();
-
 const tempUsers = {};
 
 const signUp = async (req, res) => {
@@ -52,7 +51,7 @@ const verifyOTP = async (req, res) => {
         senha: userData.senha,
       },
     });
-    
+
     const subject = "Bem-vindo!";
     const html = getWelcomeEmailTemplate(userData.nome);
     await sendEmail(userData.email, subject, html);
@@ -65,7 +64,6 @@ const verifyOTP = async (req, res) => {
   }
 };
 
-// Endpoint de login
 const login = async (req, res) => {
   const { email, senha } = req.body;
 

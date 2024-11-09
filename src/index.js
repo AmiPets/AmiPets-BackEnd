@@ -13,9 +13,9 @@ app.use(express.json());
 app.use('/api', petRoutes);
 app.use('/api', adotanteRoutes);
 app.use('/api', adocaoRoutes);
-app.use('/api', authRoutes)
+app.use('/api', authRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
-  console.log(`Servidor rodando na porta localhost:${PORT}`),
+  console.log(`Servidor rodando na porta ${PORT}`),
 );

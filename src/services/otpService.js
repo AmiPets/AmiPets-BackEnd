@@ -3,6 +3,8 @@ import getOtpEmailTemplate from '../utils/templates/otpEmailTemplate.js';
 
 const otpStore = {};
 const OTP_EXPIRATION = 5 * 60 * 1000;
+const MAX_ATTEMPTS = 3;
+const BLOCK_DURATION = 10 * 60 * 1000;
 
 const otpService = {
   generateOTP() {
@@ -10,10 +12,34 @@ const otpService = {
   },
 
   async sendOTP(email, nome) {
-    const otp = this.generateOTP();
-    const expirationTime = Date.now() + OTP_EXPIRATION;
+    const now = Date.now();
+    let userRecord = otpStore[email];
 
-    otpStore[email] = { otp, expirationTime };
+    if (!userRecord) {
+      userRecord = otpStore[email] = { attempts: 0, otp: '', expirationTime: 0, isBlocked: false, blockedUntil: 0 };
+    }
+
+    if (userRecord.isBlocked && now < userRecord.blockedUntil) {
+      throw new Error("Você excedeu o limite de tentativas. Tente novamente mais tarde.");
+    }
+
+    if (userRecord.isBlocked && now >= userRecord.blockedUntil) {
+      userRecord.attempts = 0;
+      userRecord.isBlocked = false;
+    }
+
+    userRecord.attempts += 1;
+    if (userRecord.attempts > MAX_ATTEMPTS) {
+      userRecord.isBlocked = true;
+      userRecord.blockedUntil = now + BLOCK_DURATION;
+      throw new Error("Você excedeu o limite de tentativas. Tente novamente mais tarde.");
+    }
+
+    const otp = this.generateOTP();
+    const expirationTime = now + OTP_EXPIRATION;
+
+    userRecord.otp = otp;
+    userRecord.expirationTime = expirationTime;
 
     const subject = "Seu código de verificação";
     const html = getOtpEmailTemplate(nome, otp);
