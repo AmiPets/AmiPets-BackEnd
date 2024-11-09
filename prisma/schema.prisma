@@ -14,10 +14,10 @@ model Pet {
   especie        String // Cachorro, Gato, Coelho, etc.
   dataNascimento DateTime // Data de nascimento aproximada
   descricao      String? // Descrição do pet
-  status         String   @default("disponível") // "disponível"
-  tamanho        String? // Porte do pet (ex: pequeno, médio, grande)
+  status         String   @default("0") // "disponível"
+  tamanho        String? //  Porte do pet (ex: pequeno, médio, grande)
   personalidade  String[] // Personalidade do pet (ex: brincalhão, calmo)
-  foto           String? 
+  foto           String? // URL da foto do pet
 
   // Relacionamento com Adoção (op)
   adocao Adocao?
@@ -43,10 +43,10 @@ model Adocao {
   dataAdocao DateTime @default(now())
 
   // Relacionamento com o Adotante
-  adotante   Adotante @relation(fields: [adotanteId], references: [id])
+  adotante   Adotante @relation(fields: [adotanteId], references: [id], onDelete: Cascade)
   adotanteId Int
 
   // Relacionamento com o Pet
-  pet   Pet @relation(fields: [petId], references: [id])
+  pet   Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
   petId Int @unique // Define `petId` como único para relação um-para-um
 }
