@@ -5,7 +5,7 @@ import Adotante from '../entities/adotante.js';
 const prisma = new PrismaClient();
 
 class AdotanteController {
-  // Read - Obter todos os Adotantes
+  // Read - Obter Adotante por ID
   static async getAdotanteById(req, res) {
     const { id } = req.params;
 
@@ -22,7 +22,7 @@ class AdotanteController {
       console.error(error);
       res.status(500).json({ error: 'Erro ao buscar o Adotante.' });
     }
-  };
+  }
 
   // Update - Atualizar Adotante por ID
   static async updateAdotante(req, res) {

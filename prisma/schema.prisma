@@ -42,10 +42,10 @@ model Adocao {
   dataAdocao DateTime @default(now())
 
   // Relacionamento com o Adotante
-  adotante   Adotante @relation(fields: [adotanteId], references: [id])
+  adotante   Adotante @relation(fields: [adotanteId], references: [id], onDelete: Cascade)
   adotanteId Int
 
   // Relacionamento com o Pet
-  pet   Pet @relation(fields: [petId], references: [id])
+  pet   Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
   petId Int @unique // Define `petId` como único para relação um-para-um
 }
