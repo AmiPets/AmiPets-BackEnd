@@ -1,5 +1,6 @@
 import { prismaClient } from '../database/prismaClient.js';
 import Adocao from '../entities/adocao.js';
+import { formatDate } from '../utils/dateUtils.js';
 
 class AdocaoController {
   // Método para verificar a existência de um registro
@@ -42,8 +43,10 @@ class AdocaoController {
         },
       });
 
-      // Instanciar a nova adoção usando a classe Adocao
+      // Instanciar a nova adoção e formatar a data
       const novaAdocao = new Adocao(novaAdocaoDb);
+      novaAdocao.dataAdocao = formatDate(novaAdocao.dataAdocao); // Formata a data para a resposta
+
       res.status(201).json(novaAdocao);
     } catch (error) {
       console.error(error);
@@ -60,7 +63,11 @@ class AdocaoController {
           pet: true,
         },
       });
-      const adocoes = adocoesDb.map((adocaoDb) => new Adocao(adocaoDb));
+      const adocoes = adocoesDb.map((adocaoDb) => {
+        const adocao = new Adocao(adocaoDb);
+        adocao.dataAdocao = formatDate(adocao.dataAdocao); // Formata a data para a resposta
+        return adocao;
+      });
       res.status(200).json(adocoes);
     } catch (error) {
       console.error(error);
@@ -82,8 +89,11 @@ class AdocaoController {
           pet: true,
         },
       });
+
       if (adocaoDb) {
-        const adocao = new Adocao(adocaoDb);
+        // Formatar a data de adoção
+        const dataAdocaoFormatada = formatDate(new Date(adocaoDb.dataAdocao));
+        const adocao = new Adocao({ ...adocaoDb, dataAdocao: dataAdocaoFormatada });
         res.status(200).json(adocao);
       } else {
         res.status(404).json({ error: 'Adoção não encontrada.' });
@@ -119,7 +129,11 @@ class AdocaoController {
           petId,
         },
       });
-      const adocaoAtualizada = new Adocao(adocaoAtualizadaDb);
+
+      // Formatar a data da adoção antes de retornar
+      const dataAdocaoFormatada = formatDate(new Date(adocaoAtualizadaDb.dataAdocao));
+
+      const adocaoAtualizada = new Adocao({ ...adocaoAtualizadaDb, dataAdocao: dataAdocaoFormatada });
       res.status(200).json(adocaoAtualizada);
     } catch (error) {
       console.error(error);
@@ -155,7 +169,13 @@ class AdocaoController {
         },
       });
 
-      res.status(200).json(adocoes);
+      // Formatando as datas de adoção para todas as adoções
+      const adocoesComDataFormatada = adocoes.map(adocaoDb => {
+        const dataAdocaoFormatada = formatDate(new Date(adocaoDb.dataAdocao));
+        return new Adocao({ ...adocaoDb, dataAdocao: dataAdocaoFormatada });
+      });
+
+      res.status(200).json(adocoesComDataFormatada);
     } catch (error) {
       console.error(error);
       res.status(500).json({
