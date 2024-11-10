@@ -70,28 +70,34 @@ const login = async (req, res) => {
   const { email, senha } = req.body;
 
   try {
-    const adotante = await prismaClient.adotante.findUnique({
-      where: { email },
+    const user = await prismaClient.adotante.findUnique({
+      where: { email: email },
     });
 
-    if (!adotante) {
+    if (!user) {
       return res.status(404).json({ message: 'Usuário não encontrado' });
     }
 
-    const isMatch = await bcrypt.compare(senha, adotante.senha);
-
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Senha incorreta' });
+    const isValidPassword = await bcrypt.compare(senha, user.senha);
+    if (!isValidPassword) {
+      return res.status(401).json({ message: 'Senha incorreta' });
     }
 
-    const token = generateToken(adotante.id, adotante.email);
+    const token = await generateToken(user.id, user.email);
 
-    return res.json({ message: 'Login bem-sucedido', token });
+    console.log('Token de login:', token);
+
+    return res.status(200).json({
+      message: 'Login bem-sucedido',
+      token: token,
+    });
+
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Erro interno do servidor', error });
+    console.error('Erro no login:', error);
+    return res.status(500).json({ message: 'Erro ao processar o login' });
   }
 };
+
 
 export default {
   login,

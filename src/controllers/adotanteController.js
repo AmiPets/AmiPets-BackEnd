@@ -25,7 +25,7 @@ class AdotanteController {
   static async updateAdotante(req, res) {
     const { id } = req.params;
     const { nome, email, telefone, endereco, senha, isAdmin } = req.body;
-
+  
     try {
       const adotante = await prismaClient.adotante.findUnique({
         where: { id: parseInt(id, 10) },
@@ -33,7 +33,15 @@ class AdotanteController {
       if (!adotante) {
         return res.status(404).json({ error: 'Adotante não encontrado.' });
       }
-
+  
+      if (!req.user) {
+        return res.status(401).json({ message: 'Usuário não autenticado.' });
+      }
+  
+      if (isAdmin !== undefined && !req.user.isAdmin) {
+        return res.status(403).json({ error: 'Você não tem permissão para alterar o campo "isAdmin".' });
+      }
+  
       const updatedAdotante = new Adotante({
         id: adotante.id,
         nome: nome || adotante.nome,
@@ -42,14 +50,13 @@ class AdotanteController {
         endereco: endereco || adotante.endereco,
         isAdmin: isAdmin !== undefined ? isAdmin : adotante.isAdmin,
       });
-
-      // Se uma nova senha for fornecida, criptografa
+  
       if (senha) {
         await updatedAdotante.setSenha(senha);
       } else {
-        updatedAdotante.senha = adotante.senha; // Mantém a senha antiga
+        updatedAdotante.senha = adotante.senha;
       }
-
+  
       const adotanteAtualizado = await prismaClient.adotante.update({
         where: { id: parseInt(id, 10) },
         data: {
@@ -67,7 +74,7 @@ class AdotanteController {
       res.status(500).json({ error: 'Erro ao atualizar o Adotante.' });
     }
   }
-
+  
   // Delete - Remover Adotante por ID
   static async deleteAdotante(req, res) {
     const { id } = req.params;
