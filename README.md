@@ -78,8 +78,6 @@ Utilize ferramentas como Postman ou Insomnia para fazer requisições HTTP e tes
 ## Estrutura do Projeto
 O projeto está estruturado da seguinte forma:
 
-    bash
-Copiar código
     /amipets
         /controllers         # Controladores que gerenciam as rotas e lógica de negócio
         /entities            # Definições de entidades (Ex: Pet, Adoção)
