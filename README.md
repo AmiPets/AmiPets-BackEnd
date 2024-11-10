@@ -6,10 +6,10 @@ O Amipets é uma plataforma de adoção de animais de estimação que conecta ad
 
 O objetivo principal do Amipets é facilitar o processo de adoção de animais, oferecendo uma interface simples para:
 
-    - Cadastrar novos pets para adoção.
-    - Visualizar informações detalhadas sobre cada pet.
-    - Buscar pets filtrando por características como espécie, tamanho, e personalidade.
-    - Realizar adoções e atualizar o status do pet para "adotado".
+- Cadastrar novos pets para adoção.
+- Visualizar informações detalhadas sobre cada pet.
+- Buscar pets filtrando por características como espécie, tamanho, e personalidade.
+- Realizar adoções e atualizar o status do pet para "adotado".
 
 ## 💻 Funcionalidades
 - Cadastro de Pet: Permite a criação de novos cadastros de pets com informações como nome, espécie, idade, tamanho, descrição e foto.
