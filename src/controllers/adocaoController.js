@@ -43,10 +43,17 @@ class AdocaoController {
         },
       });
 
+      // Atualizar o status do pet para 'adotado' (1)
+      const petAtualizado = await prismaClient.pet.update({
+        where: { id: petId },
+        data: { status: '1' }, // Atualiza o status para 'adotado'
+      });
+
       // Instanciar a nova adoção e formatar a data
       const novaAdocao = new Adocao(novaAdocaoDb);
       novaAdocao.dataAdocao = formatDate(novaAdocao.dataAdocao); // Formata a data para a resposta
 
+      // Retornar a resposta
       res.status(201).json(novaAdocao);
     } catch (error) {
       console.error(error);
@@ -133,7 +140,10 @@ class AdocaoController {
       // Formatar a data da adoção antes de retornar
       const dataAdocaoFormatada = formatDate(new Date(adocaoAtualizadaDb.dataAdocao));
 
-      const adocaoAtualizada = new Adocao({ ...adocaoAtualizadaDb, dataAdocao: dataAdocaoFormatada });
+      const adocaoAtualizada = new Adocao({
+        ...adocaoAtualizadaDb,
+        dataAdocao: dataAdocaoFormatada,
+      });
       res.status(200).json(adocaoAtualizada);
     } catch (error) {
       console.error(error);
@@ -170,7 +180,7 @@ class AdocaoController {
       });
 
       // Formatando as datas de adoção para todas as adoções
-      const adocoesComDataFormatada = adocoes.map(adocaoDb => {
+      const adocoesComDataFormatada = adocoes.map((adocaoDb) => {
         const dataAdocaoFormatada = formatDate(new Date(adocaoDb.dataAdocao));
         return new Adocao({ ...adocaoDb, dataAdocao: dataAdocaoFormatada });
       });
