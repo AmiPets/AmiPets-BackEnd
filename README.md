@@ -67,7 +67,7 @@ Para rodar este projeto em sua máquina local, siga os passos abaixo:
 
 5. Iniciar o Servidor
 ```
-    npm start
+    npm run dev
 ```
 O servidor estará rodando em http://localhost:3000.
 
