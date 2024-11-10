@@ -39,55 +39,44 @@ Este projeto foi desenvolvido utilizando as seguintes tecnologias:
 
 ## Como Rodar o Projeto
 Para rodar este projeto em sua máquina local, siga os passos abaixo:
+
+1. Clone o repositório 
 ```
-1. Clone o repositório
-    bash
-Copiar código
     git clone https://github.com/AmiPets/AmiPets-BackEnd.git
 ```
-```
-2. Instale as dependências
-    Dentro do diretório do projeto, instale as dependências necessárias:
 
-    bash
-    Copiar código
+2. Instale as dependências
+    ```
     cd amipets
     npm install
 ```
 ```
 3. Configuração do Banco de Dados
-Antes de rodar o projeto, você precisa configurar o banco de dados.
 
-    Instalar o PostgreSQL: Certifique-se de que o PostgreSQL está instalado em sua máquina.
-    Criar o banco de dados: Crie um banco de dados no PostgreSQL.
-    Configurar o arquivo .env: Crie um arquivo .env na raiz do projeto com as credenciais de acesso ao banco de dados:
-    bash
-    Copiar código
+- Instalar o PostgreSQL: Certifique-se de que o PostgreSQL está instalado em sua máquina.
+- Criar o banco de dados: Crie um banco de dados no PostgreSQL.
+- Configurar o arquivo .env: Crie um arquivo .env na raiz do projeto com as credenciais de acesso ao banco de dados:
+
+```
     DATABASE_URL="postgresql://usuario:senha@localhost:5432/amipets"
 ```
-```
-4. Rodar as Migrações Prisma
-Rodar as migrações para criar as tabelas no banco de dados:
 
-    bash
-    Copiar código
+4. Rodar as Migrações Prisma
+```
     npx prisma migrate dev
 ```
-```
+
 5. Iniciar o Servidor
-Agora, você pode rodar o servidor:
-
-    bash
-    Copiar código
+```
     npm start
-    O servidor estará rodando em http://localhost:3000.
+```
+O servidor estará rodando em http://localhost:3000.
 
-```
-```
+
 6. Testar a API
 Utilize ferramentas como Postman ou Insomnia para fazer requisições HTTP e testar as funcionalidades da API, como cadastrar pets, adotar um pet e buscar pets.
 
-Estrutura do Projeto
+## Estrutura do Projeto
 O projeto está estruturado da seguinte forma:
 
     bash
