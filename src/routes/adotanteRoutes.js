@@ -5,6 +5,7 @@ import requireAuth from '../middlewares/requireAuth.js';
 
 const router = express.Router();
 
+
 /**
  * @swagger
  * tags:
@@ -35,6 +36,9 @@ const router = express.Router();
  *       401:
  *         description: Não autorizado
  */
+
+router.get('/adotante/', requireAuth, AdotanteController.getAdotante);
+
 router.get('/adotante/:id', requireAuth, AdotanteController.getAdotanteById);
 
 /**
