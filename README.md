@@ -87,7 +87,7 @@ O projeto está estruturado da seguinte forma:
         /migrations          # Migrations do Prisma
         .env                 # Arquivo de configuração de variáveis de ambiente
         package.json         # Dependências e scripts do projeto
-```
+
 ## Conclusão
 Este projeto oferece uma solução prática para a adoção de animais, com um backend robusto e uma API fácil de usar. 
 
