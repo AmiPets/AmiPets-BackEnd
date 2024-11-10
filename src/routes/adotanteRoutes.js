@@ -5,6 +5,7 @@ import requireAuth from '../middlewares/requireAuth.js';
 
 const router = express.Router();
 
+router.get('/adotante/', requireAuth, AdotanteController.getAdotante);
 router.get('/adotante/:id', requireAuth, AdotanteController.getAdotanteById);
 router.put('/adotante/:id', requireAuth, AdotanteController.updateAdotante);
 router.delete('/adotante/:id', requireAuth, AdotanteController.deleteAdotante);
