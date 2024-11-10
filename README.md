@@ -46,10 +46,9 @@ Para rodar este projeto em sua máquina local, siga os passos abaixo:
 ```
 
 2. Instale as dependências
-    ```
+ ```
     cd amipets
     npm install
-```
 ```
 3. Configuração do Banco de Dados
 
