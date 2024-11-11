@@ -19,7 +19,7 @@ class PetController {
 
   // Cria um novo Pet
   static async createPet(req, res) {
-    const { nome, especie, dataNascimento, descricao, status, tamanho, personalidade, foto } =
+    let { nome, especie, dataNascimento, descricao, status, tamanho, personalidade, foto } =
       req.body;
     let errorMessages = '';
 
@@ -35,6 +35,13 @@ class PetController {
       if (!isValidDate(new Date(dataNascimento))) {
         errorMessages += 'A data deve possuir um formato válido! ';
       }
+    }
+
+    if (tamanho) {
+      tamanho = tamanho
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
     }
 
     if (errorMessages) {
