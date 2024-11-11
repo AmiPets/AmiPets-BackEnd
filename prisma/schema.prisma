@@ -1,0 +1,52 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Pet {
+  id             Int      @id @default(autoincrement())
+  nome           String // Nome do bixano
+  especie        String // Cachorro, Gato, Coelho, etc.
+  dataNascimento DateTime // Data de nascimento aproximada
+  descricao      String? // Descrição do pet
+  status         String   @default("0") // "disponível" ou 1 para "adotado"
+  tamanho        String? //  Porte do pet (ex: pequeno, médio, grande)
+  personalidade  String[] // Personalidade do pet (ex: brincalhão, calmo)
+  foto           String? // URL da foto do pet
+
+  // Relacionamento com Adoção (op)
+  adocao Adocao?
+
+  @@index([status]) // Índice para facilitar consultas por status
+}
+
+model Adotante {
+  id       Int     @id @default(autoincrement())
+  nome     String
+  email    String  @unique
+  telefone String
+  endereco String
+  senha    String
+  isAdmin  Boolean @default(false) // Define se o adotante é administrador
+
+  // Relacionamento com Adoções
+  adocoes Adocao[]
+}
+
+model Adocao {
+  id         Int      @id @default(autoincrement())
+  dataAdocao DateTime @default(now())
+
+  // Relacionamento com o Adotante
+  adotante   Adotante @relation(fields: [adotanteId], references: [id], onDelete: Cascade)
+  adotanteId Int
+
+  // Relacionamento com o Pet
+  pet   Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+  petId Int @unique // Define `petId` como único para relação um-para-um
+}
