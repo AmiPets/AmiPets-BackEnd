@@ -36,10 +36,54 @@ const router = express.Router();
  *       401:
  *         description: Não autorizado
  */
-
-router.get('/adotante/', requireAuth, AdotanteController.getAdotante);
-
 router.get('/adotante/:id', requireAuth, AdotanteController.getAdotanteById);
+
+/**
+ * @swagger
+ * /adotante:
+ *   get:
+ *     summary: Retorna informações do adotante autenticado
+ *     tags: [Adotante]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dados do adotante autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   description: ID do adotante
+ *                   example: 1
+ *                 nome:
+ *                   type: string
+ *                   description: Nome do adotante
+ *                   example: "João da Silva"
+ *                 email:
+ *                   type: string
+ *                   description: E-mail do adotante
+ *                   example: "joao.silva@email.com"
+ *                 telefone:
+ *                   type: string
+ *                   description: Telefone do adotante
+ *                   example: "(11) 98765-4321"
+ *                endereco:
+ *                   type: string
+ *                   description: Endereço do adotante
+ *                   example: "Rua logo ali"
+ *               isAdmin:
+ *                   type: string
+ *                   description: Se o adotante e administrador
+ *                   example: "false"
+ *       401:
+ *         description: Não autorizado, o usuário precisa estar autenticado
+ *       404:
+ *         description: Adotante não encontrado
+ */
+router.get('/adotante/', requireAuth, AdotanteController.getAdotante);
 
 /**
  * @swagger
