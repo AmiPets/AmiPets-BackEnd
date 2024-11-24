@@ -16,7 +16,7 @@ const swaggerOptions = {
         description: 'Servidor de Desenvolvimento',
       },
       {
-        url: 'http://amipets.ddns.net/api',
+        url: 'https://amipets.myddns.me/api',
         description: 'Servidor de Produção',
       },
     ],
