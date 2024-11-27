@@ -6,9 +6,13 @@ import adocaoRoutes from './routes/adocaoRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import setupSwagger from './utils/swaggerConfig.js';
 
+import cors from 'cors';
+
 dotenv.config();
 
 const app = express();
+app.use(cors());
+
 setupSwagger(app);
 app.use(express.json());
 
