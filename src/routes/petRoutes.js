@@ -63,7 +63,7 @@ router.post('/pets', requireAuth, PetController.createPet);
  *       200:
  *         description: Lista de pets
  */
-router.get('/pets', requireAuth, PetController.getPets);
+router.get('/pets', PetController.getPets);
 
 
 /**
@@ -87,7 +87,7 @@ router.get('/pets', requireAuth, PetController.getPets);
  *       404:
  *         description: Pet não encontrado
  */
-router.get('/pets/:id', requireAuth, PetController.getPetById);
+router.get('/pets/:id', PetController.getPetById);
 
 /**
  * @swagger
