@@ -38,15 +38,23 @@ model Adotante {
   adocoes Adocao[]
 }
 
+enum StatusAdocao {
+  SOLICITACAO_ENVIADA
+  EM_ANALISE
+  APROVADO
+}
+
 model Adocao {
-  id         Int      @id @default(autoincrement())
-  dataAdocao DateTime @default(now())
+  id         Int           @id @default(autoincrement())
+  dataAdocao DateTime      @default(now())
+  status     StatusAdocao  @default(SOLICITACAO_ENVIADA)
 
   // Relacionamento com o Adotante
-  adotante   Adotante @relation(fields: [adotanteId], references: [id], onDelete: Cascade)
+  adotante   Adotante      @relation(fields: [adotanteId], references: [id], onDelete: Cascade)
   adotanteId Int
 
   // Relacionamento com o Pet
-  pet   Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
-  petId Int @unique // Define `petId` como único para relação um-para-um
+  pet        Pet           @relation(fields: [petId], references: [id], onDelete: Cascade)
+  petId      Int           @unique // Define `petId` como único para relação um-para-um
 }
+

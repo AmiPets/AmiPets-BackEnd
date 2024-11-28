@@ -127,6 +127,32 @@ router.get('/adocao/:id', requireAuth, AdocaoController.getAdocaoById);
  */
 router.put('/adocao/:id', requireAuth, AdocaoController.updateAdocao);
 
+
+/**
+ * @swagger
+ * /adocao/pet/{petId}:
+ *   get:
+ *     summary: Retorna a adoção de um pet específico pelo ID do pet
+ *     tags: [Adoção]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: petId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID do pet
+ *     responses:
+ *       200:
+ *         description: Dados da adoção do pet encontrado
+ *       404:
+ *         description: Pet não está em adoção
+ *       401:
+ *         description: Não autorizado
+ */
+router.get('/adocao/pet/:petId', requireAuth, AdocaoController.getAdocaoByPetId);
+
 /**
  * @swagger
  * /adocao/{id}:
@@ -152,6 +178,5 @@ router.put('/adocao/:id', requireAuth, AdocaoController.updateAdocao);
  */
 
 router.delete('/adocao/:id', requireAuth, AdocaoController.deleteAdocao);
-// router.get('/adocoes/adotante/:adotanteId', requireAuth, AdocaoController.getAdocoesByAdotanteId);
 
 export default router;
