@@ -70,19 +70,20 @@ router.get('/adotante/:id', requireAuth, AdotanteController.getAdotanteById);
  *                   type: string
  *                   description: Telefone do adotante
  *                   example: "(11) 98765-4321"
- *                endereco:
+ *                 endereco:
  *                   type: string
  *                   description: Endereço do adotante
  *                   example: "Rua logo ali"
- *               isAdmin:
- *                   type: string
- *                   description: Se o adotante e administrador
- *                   example: "false"
+ *                 isAdmin:
+ *                   type: boolean
+ *                   description: Se o adotante é administrador
+ *                   example: false
  *       401:
  *         description: Não autorizado, o usuário precisa estar autenticado
  *       404:
  *         description: Adotante não encontrado
  */
+
 router.get('/adotante/', requireAuth, AdotanteController.getAdotante);
 
 /**
