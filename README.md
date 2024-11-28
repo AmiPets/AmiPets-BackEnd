@@ -1,4 +1,4 @@
-# AmiPets
+# 🐾 AmiPets
 
 O Amipets é uma plataforma de adoção de animais de estimação que conecta adotantes e pets, oferecendo uma maneira simples e eficiente de adotar animais. O projeto permite que os usuários cadastrem, busquem e adotem pets, além de gerenciar o processo de adoção com funcionalidades como a atualização do status do pet.
 

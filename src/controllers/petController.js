@@ -1,5 +1,6 @@
 import { prismaClient } from '../database/prismaClient.js';
 import Pet from '../entities/pet.js';
+import { validateArrayJson } from '../utils/validateArrayJson.js';
 import { isValidDate } from '../utils/isValidDate.js';
 import { validateId } from '../utils/validateId.js';
 
@@ -143,7 +144,7 @@ class PetController {
 
   // Seleciona os pets por parâmetros query
   static async getPets(req, res) {
-    let { offset, limit, especie, status, tamanho, personalidade } = req.query;
+    let { offset, limit, especie, status, tamanho, personalidade, nome } = req.query;
 
     offset = offset && !isNaN(Number(offset)) ? Number(offset) : 0;
     limit = limit && !isNaN(Number(limit)) ? Number(limit) : 15;
@@ -163,14 +164,75 @@ class PetController {
       personalidade = [];
     }
 
+    if (especie) {
+      try {
+        especie = JSON.parse(especie);
+        if (!Array.isArray(especie)) {
+          return res.status(400).json({ message: 'Espécie deve ser um array válido.' });
+        }
+      } catch (error) {
+        return res
+          .status(500)
+          .json({ message: "Erro ao processar o campo 'especie'.", error: error.message });
+      }
+    } else {
+      especie = [];
+    }
+
+    if (status) {
+      try {
+        status = JSON.parse(status);
+        if (!Array.isArray(status)) {
+          return res.status(400).json({ message: 'Status deve ser um array válido.' });
+        }
+      } catch (error) {
+        return res
+          .status(500)
+          .json({ message: "Erro ao processar o campo 'status'.", error: error.message });
+      }
+    } else {
+      status = [];
+    }
+
+    if (tamanho) {
+      try {
+        tamanho = JSON.parse(tamanho);
+        if (!Array.isArray(tamanho)) {
+          return res.status(400).json({ message: 'Tamanho deve ser um array válido.' });
+        }
+      } catch (error) {
+        return res
+          .status(500)
+          .json({ message: "Erro ao processar o campo 'tamanho'.", error: error.message });
+      }
+    } else {
+      tamanho = [];
+    }
+
     try {
       const allPets = await prismaClient.pet.findMany({
         skip: offset,
         take: limit,
         where: {
-          especie,
-          status,
-          tamanho,
+          nome: {
+            contains: nome,
+            mode: 'insensitive'
+          },
+          ... (especie.length > 0 && {
+            especie: {
+              in: especie
+            }
+          }),
+          ... (status.length > 0 && {
+            status: {
+              in: status
+            }
+          }),
+          ... (tamanho.length > 0 && {
+            tamanho: {
+              in: tamanho
+            }
+          }),
           ...(personalidade.length > 0 && {
             personalidade: {
               hasEvery: personalidade,
