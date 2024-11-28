@@ -214,7 +214,10 @@ class PetController {
         skip: offset,
         take: limit,
         where: {
-          nome: nome,
+          nome: {
+            contains: nome,
+            mode: 'insensitive'
+          },
           ... (especie.length > 0 && {
             especie: {
               in: especie
