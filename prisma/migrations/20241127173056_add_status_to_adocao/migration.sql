@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "StatusAdocao" AS ENUM ('SOLICITACAO_ENVIADA', 'EM_ANALISE', 'APROVADO');
+
+-- AlterTable
+ALTER TABLE "Adocao" ADD COLUMN     "status" "StatusAdocao" NOT NULL DEFAULT 'SOLICITACAO_ENVIADA';
