@@ -1,9 +1,12 @@
 import { prismaClient } from '../database/prismaClient.js';
 import Adocao from '../entities/adocao.js';
 import { formatDate } from '../utils/dateUtils.js';
+import StatusAdocao from '../enums/statusAdocao.js';
+import sendEmail from '../services/emailService.js';
+import { getAdoçãoStatusUpdateEmailTemplate } from '../utils/templates/getAdoçãoStatusUpdateEmailTemplate.js';
+import { getAdoçãoConfirmationEmailTemplate } from '../utils/templates/getAdoçãoConfirmationEmailTemplate.js';
 
 class AdocaoController {
-  // Método para verificar a existência de um registro
   static async entityExists(type, id) {
     const entity = await prismaClient[type].findUnique({
       where: { id },
@@ -11,57 +14,89 @@ class AdocaoController {
     return entity !== null;
   }
 
-  // Create - Criar uma nova adoção
   static async createAdocao(req, res) {
     const { adotanteId, petId } = req.body;
-
+  
     try {
-      // Verificar se o pet e o adotante existem
+      // Verificar se o pet existe
       const petExists = await AdocaoController.entityExists('pet', petId);
-      const adotanteExists = await AdocaoController.entityExists('adotante', adotanteId);
-
       if (!petExists) {
         return res.status(404).json({ error: 'Pet não encontrado.' });
       }
+  
+      // Verificar se o adotante existe
+      const adotanteExists = await AdocaoController.entityExists('adotante', adotanteId);
       if (!adotanteExists) {
         return res.status(404).json({ error: 'Adotante não encontrado.' });
       }
-
-      // Verificar se o pet já está adotado
+  
+      // Verificar se o pet já foi adotado
       const petJaAdotado = await prismaClient.adocao.findUnique({
         where: { petId },
       });
       if (petJaAdotado) {
         return res.status(400).json({ error: 'Este pet já foi adotado.' });
       }
-
-      // Criar nova adoção no banco
+  
+      // Criar a adoção no banco de dados
       const novaAdocaoDb = await prismaClient.adocao.create({
         data: {
           adotanteId,
           petId,
+          status: StatusAdocao.SOLICITACAO_ENVIADA,
+        },
+        include: {
+          adotante: true,
+          pet: true,
         },
       });
-
-      // Atualizar o status do pet para 'adotado' (1)
-      const petAtualizado = await prismaClient.pet.update({
+  
+      // Verificar se o adotante e pet foram retornados corretamente
+      if (!novaAdocaoDb.adotante || !novaAdocaoDb.pet) {
+        return res.status(404).json({ error: 'Adotante ou Pet não encontrado.' });
+      }
+  
+      // Alterar o status do pet para "adotado" (1)
+      await prismaClient.pet.update({
         where: { id: petId },
-        data: { status: '1' }, // Atualiza o status para 'adotado'
+        data: { status: "1" }, // Atualiza para "adotado"
       });
-
-      // Instanciar a nova adoção e formatar a data
+  
+      // Criar o objeto de adoção
       const novaAdocao = new Adocao(novaAdocaoDb);
-      novaAdocao.dataAdocao = formatDate(novaAdocao.dataAdocao); // Formata a data para a resposta
-
-      // Retornar a resposta
+      novaAdocao.dataAdocao = formatDate(novaAdocao.dataAdocao);
+  
+      // Obter o e-mail do adotante
+      const adotanteEmail = novaAdocaoDb.adotante.email;
+      if (!adotanteEmail) {
+        return res.status(404).json({ error: 'Email do adotante não encontrado.' });
+      }
+  
+      // Obter o nome do adotante e do pet
+      const adotanteNome = novaAdocaoDb.adotante.nome;
+      const petNome = novaAdocaoDb.pet.nome;
+  
+      // Definir o assunto e o corpo do e-mail
+      const subject = 'Adoção de pet - Solicitação recebida';
+      const html = getAdoçãoConfirmationEmailTemplate(adotanteNome, petNome);
+  
+      // Enviar e-mail de confirmação
+      try {
+        await sendEmail(adotanteEmail, subject, html);
+      } catch (emailError) {
+        console.error("Erro ao enviar o e-mail:", emailError);
+        return res.status(500).json({ error: 'Erro ao enviar o e-mail de confirmação.' });
+      }
+  
+      // Retornar a resposta com a nova adoção criada
       res.status(201).json(novaAdocao);
     } catch (error) {
-      console.error(error);
+      console.error("Erro ao criar adoção:", error);
       res.status(500).json({ error: 'Erro ao criar a adoção.' });
     }
   }
+  
 
-  // Read - Obter todas as adoções
   static async getAllAdocoes(req, res) {
     try {
       const adocoesDb = await prismaClient.adocao.findMany({
@@ -72,19 +107,18 @@ class AdocaoController {
       });
       const adocoes = adocoesDb.map((adocaoDb) => {
         const adocao = new Adocao(adocaoDb);
-        adocao.dataAdocao = formatDate(adocao.dataAdocao); // Formata a data para a resposta
+        adocao.dataAdocao = formatDate(adocao.dataAdocao);
         return adocao;
       });
       res.status(200).json(adocoes);
     } catch (error) {
       console.error(error);
       res.status(500).json({
-        error: 'Erro ao buscar as adoções. Verifique se pet ou adotante existe.',
+        error: 'Erro ao buscar as adoções.',
       });
     }
   }
 
-  // Read - Obter adoção por ID
   static async getAdocaoById(req, res) {
     const { id } = req.params;
 
@@ -98,7 +132,6 @@ class AdocaoController {
       });
 
       if (adocaoDb) {
-        // Formatar a data de adoção
         const dataAdocaoFormatada = formatDate(new Date(adocaoDb.dataAdocao));
         const adocao = new Adocao({ ...adocaoDb, dataAdocao: dataAdocaoFormatada });
         res.status(200).json(adocao);
@@ -111,39 +144,59 @@ class AdocaoController {
     }
   }
 
-  // Update - Atualizar adoção por ID
   static async updateAdocao(req, res) {
     const { id } = req.params;
-    const { adotanteId, petId } = req.body;
-
+    const { adotanteId, petId, status } = req.body;
+  
     try {
-      // Verificar se o pet e o adotante existem
+      const adocaoExistente = await prismaClient.adocao.findUnique({
+        where: { id: parseInt(id, 10) },
+        include: {
+          adotante: true,
+          pet: true,
+        },
+      });
+  
+      if (!adocaoExistente) {
+        return res.status(404).json({ error: 'Adoção não encontrada.' });
+      }
+  
+      const { nome: nomeAdotante, email: adotanteEmail } = adocaoExistente.adotante || {};
+      const { nome: nomePet } = adocaoExistente.pet || {};
+  
       const petExists = await AdocaoController.entityExists('pet', petId);
       const adotanteExists = await AdocaoController.entityExists('adotante', adotanteId);
-
+  
       if (!petExists) {
         return res.status(404).json({ error: 'Pet não encontrado.' });
       }
       if (!adotanteExists) {
         return res.status(404).json({ error: 'Adotante não encontrado.' });
       }
-
-      // Atualizar a adoção no banco
+  
       const adocaoAtualizadaDb = await prismaClient.adocao.update({
         where: { id: parseInt(id, 10) },
         data: {
           adotanteId,
           petId,
+          status,
+          dataAdocao: new Date(),
         },
       });
-
-      // Formatar a data da adoção antes de retornar
+  
       const dataAdocaoFormatada = formatDate(new Date(adocaoAtualizadaDb.dataAdocao));
-
-      const adocaoAtualizada = new Adocao({
-        ...adocaoAtualizadaDb,
-        dataAdocao: dataAdocaoFormatada,
+  
+      const adocaoAtualizada = new Adocao({ 
+        ...adocaoAtualizadaDb, 
+        dataAdocao: dataAdocaoFormatada 
       });
+  
+      if (adocaoExistente.status !== status) {
+        const subject = `Atualização no processo de adoção para ${adocaoExistente.pet.nome}`;
+        const html = getAdoçãoStatusUpdateEmailTemplate(nomeAdotante, nomePet, status);
+        await sendEmail(adotanteEmail, subject, html);
+      }
+  
       res.status(200).json(adocaoAtualizada);
     } catch (error) {
       console.error(error);
@@ -151,7 +204,37 @@ class AdocaoController {
     }
   }
 
-  // Delete - Remover adoção por ID
+  static async getStatusAdocaoPorPetId(req, res) {
+    const { petId } = req.params;
+
+    try {
+      const adocaoDb = await prismaClient.adocao.findFirst({
+        where: {
+          petId: parseInt(petId, 10),
+        },
+        include: {
+          pet: true, 
+        },
+      });
+
+      if (!adocaoDb) {
+        return res.status(404).json({ error: 'Nenhuma adoção encontrada para este pet.' });
+      }
+
+      const dataAdocaoFormatada = formatDate(new Date(adocaoDb.dataAdocao));
+
+      const adocao = new Adocao({
+        ...adocaoDb,
+        dataAdocao: dataAdocaoFormatada,
+      });
+
+      res.status(200).json({ status: adocao.status });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro ao buscar o status da adoção.' });
+    }
+  }
+
   static async deleteAdocao(req, res) {
     const { id } = req.params;
 
@@ -166,33 +249,44 @@ class AdocaoController {
     }
   }
 
-  // Read - Obter todas as adoções feitas por um usuário específico
-  static async getAdocoesByAdotanteId(req, res) {
-    const { adotanteId } = req.params;
-
+  static async getAdocaoByPetId(req, res) {
+    const { petId } = req.params;
+  
     try {
-      const adocoes = await prismaClient.adocao.findMany({
-        where: { adotanteId: parseInt(adotanteId, 10) },
+      const adocaoDb = await prismaClient.adocao.findFirst({
+        where: {
+          petId: parseInt(petId, 10),
+        },
         include: {
           pet: true,
           adotante: true,
         },
       });
-
-      // Formatando as datas de adoção para todas as adoções
-      const adocoesComDataFormatada = adocoes.map((adocaoDb) => {
-        const dataAdocaoFormatada = formatDate(new Date(adocaoDb.dataAdocao));
-        return new Adocao({ ...adocaoDb, dataAdocao: dataAdocaoFormatada });
+  
+      if (!adocaoDb) {
+        return res.status(404).json({ error: 'Este pet não está em adoção.' });
+      }
+  
+      const dataAdocaoFormatada = formatDate(new Date(adocaoDb.dataAdocao));
+  
+      const horaAdocaoFormatada = new Date(adocaoDb.dataAdocao).toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
       });
-
-      res.status(200).json(adocoesComDataFormatada);
+  
+      const adocao = new Adocao({
+        ...adocaoDb,
+        dataAdocao: dataAdocaoFormatada,
+        horaAdocao: horaAdocaoFormatada,
+      });
+  
+      res.status(200).json(adocao);
     } catch (error) {
       console.error(error);
-      res.status(500).json({
-        error: 'Erro ao buscar adoções para o adotante especificado.',
-      });
+      res.status(500).json({ error: 'Erro ao buscar a adoção deste pet.' });
     }
   }
+  
 }
 
 export default AdocaoController;
