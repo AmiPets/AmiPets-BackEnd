@@ -1,4 +1,4 @@
-export function getAdoçãoConfirmationEmailTemplate(nome, petNome) {
+export function getAdoçãoConfirmationEmailTemplate(adotanteNome, petNome) {
   return `
   <!DOCTYPE html>
   <html lang="pt-BR">
@@ -47,7 +47,7 @@ export function getAdoçãoConfirmationEmailTemplate(nome, petNome) {
             "
           >
             <p style="font-size: 18px; font-weight: 500; color: #1f1f1f;">
-              Olá ${nome}, sua adoção foi confirmada!
+              Olá ${adotanteNome}, sua adoção foi confirmada!
             </p>
             <p style="margin: 16px 0; font-weight: 400; color: #555555;">
               Parabéns por escolher o <strong>${petNome}</strong> como seu novo
