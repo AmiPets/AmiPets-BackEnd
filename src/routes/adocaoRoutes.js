@@ -179,4 +179,88 @@ router.get('/adocao/pet/:petId', requireAuth, AdocaoController.getAdocaoByPetId)
 
 router.delete('/adocao/:id', requireAuth, AdocaoController.deleteAdocao);
 
+/**
+ * @swagger
+ * /adocoes:
+ *   get:
+ *     summary: Retorna todas as adoções com detalhes do adotante e do pet
+ *     tags: [Adoção]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de todas as adoções com informações completas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: ID único da adoção
+ *                     example: 21
+ *                   dataAdocao:
+ *                     type: string
+ *                     format: date
+ *                     description: Data em que a adoção foi registrada
+ *                     example: "29/11/2024"
+ *                   adotanteId:
+ *                     type: integer
+ *                     description: ID do adotante
+ *                     example: 1
+ *                   petId:
+ *                     type: integer
+ *                     description: ID do pet
+ *                     example: 2
+ *                   status:
+ *                     type: string
+ *                     description: Status atual da adoção
+ *                     example: "SOLICITACAO_ENVIADA"
+ *                   adotante:
+ *                     type: object
+ *                     description: Detalhes do adotante
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: ID do adotante
+ *                         example: 1
+ *                       nome:
+ *                         type: string
+ *                         description: Nome do adotante
+ *                         example: "João da Silva"
+ *                       email:
+ *                         type: string
+ *                         format: email
+ *                         description: E-mail do adotante
+ *                         example: "example@gmail.com"
+ *                   pet:
+ *                     type: object
+ *                     description: Detalhes do pet
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: ID do pet
+ *                         example: 2
+ *                       nome:
+ *                         type: string
+ *                         description: Nome do pet
+ *                         example: "Magato Whiskas"
+ *                       especie:
+ *                         type: string
+ *                         description: Espécie do pet
+ *                         example: "Gato"
+ *                       foto:
+ *                         type: string
+ *                         format: uri
+ *                         description: URL da foto do pet
+ *                         example: "https://encrypted-tbn0.gstatic.com/"
+ *       401:
+ *         description: Não autorizado
+ *       500:
+ *         description: Erro ao buscar as adoções
+ */
+router.get('/adocoes',requireAuth, AdocaoController.getAllAdocoesForPetAndAdotante);
+
 export default router;
