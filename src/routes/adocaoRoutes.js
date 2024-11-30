@@ -261,6 +261,6 @@ router.delete('/adocao/:id', requireAuth, AdocaoController.deleteAdocao);
  *       500:
  *         description: Erro ao buscar as adoções
  */
-router.get('/adocoes',requireAuth, AdocaoController.getAllAdocoesForPetAndAdotante);
+router.get('/adocoes', requireAuth, AdocaoController.getAllAdocoesForPetAndAdotante);
 
 export default router;
