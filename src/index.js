@@ -1,6 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import cors from 'cors'; 
+import cors from 'cors';
 import petRoutes from './routes/petRoutes.js';
 import adotanteRoutes from './routes/adotanteRoutes.js';
 import adocaoRoutes from './routes/adocaoRoutes.js';
@@ -12,9 +12,8 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:5173'
+  origin: 'http://localhost:5174'
 }));
-
 
 setupSwagger(app);
 

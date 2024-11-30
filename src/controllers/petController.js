@@ -146,8 +146,10 @@ class PetController {
   static async getPets(req, res) {
     let { offset, limit, especie, status, tamanho, personalidade, nome } = req.query;
 
+    const { isIdValid, id, messageErrorId } = validateId(req.query.id);
+
     offset = offset && !isNaN(Number(offset)) ? Number(offset) : 0;
-    limit = limit && !isNaN(Number(limit)) ? Number(limit) : 15;
+    limit = limit && !isNaN(Number(limit)) ? Number(limit) : 50;
 
     if (personalidade) {
       try {
@@ -214,6 +216,7 @@ class PetController {
         skip: offset,
         take: limit,
         where: {
+          id,
           nome: {
             contains: nome,
             mode: 'insensitive'
